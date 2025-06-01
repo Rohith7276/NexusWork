@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 contract CriminalRecord {
+    enum Role{Public, Officers}
     struct Record {
         uint256 id;
         string name;
@@ -17,14 +18,25 @@ contract CriminalRecord {
         address addedBy;
         bool isActive;  //Case open or closed
     }
-    
+    mapping(address => Role) public users;
+    modifier ForOfficers(){
+        require(users[msg.sender] == Role.Officers, "For Investigating officers");
+        _;
+    }
+    modifier ForPublic(){
+        require(users[msg.sender] == Role.Public, "View-mode only");
+        _;
+    }
+    function setRole(address user, Role role) public onlyOwner {
+        users[user] = role;
+    }
     mapping(uint256 => Record) public IDtorecords;
     mapping(string => uint256[]) public nameToRecordIds;
     uint256[] public recordIds;
     uint256 public recordCount;
     
     address public owner;
-    mapping(address => bool) public authorizedOfficers;
+    
     
     event RecordAdded(
         uint256 indexed recordId,
@@ -44,26 +56,11 @@ contract CriminalRecord {
         require(msg.sender == owner, "Only owner can perform this action");
         _;
     }
-    
-    modifier onlyAuthorized() {
-        require(
-            msg.sender == owner || authorizedOfficers[msg.sender],
-            "Only authorized officers can perform this action"
-        );
-        _;
-    }
+
     
     constructor() {
         owner = msg.sender;
-        authorizedOfficers[msg.sender] = true;
-    }
-    
-    function addAuthorizedOfficer(address officer) public onlyOwner {
-        authorizedOfficers[officer] = true;
-    }
-    
-    function removeAuthorizedOfficer(address officer) public onlyOwner {
-        authorizedOfficers[officer] = false;
+        
     }
     
     function addRecord(
@@ -76,7 +73,7 @@ contract CriminalRecord {
         string memory _category,
         string memory _officer,
         string memory _ipfsHash
-    ) public onlyAuthorized {
+    ) public ForOfficers {
         recordCount++;
         uint256 newRecordId = recordCount;
         
@@ -154,7 +151,8 @@ contract CriminalRecord {
         string memory _category,
         string memory _officer,
         string memory _ipfsHash
-    ) public onlyAuthorized {
+    ) public ForOfficers() {
+        require(users[msg.sender] == Role.Officers, "For Investigating officers");
         require(IDtorecords[_recordId].id != 0, "Record does not exist");
         
         Record storage record = IDtorecords[_recordId];
@@ -186,9 +184,15 @@ contract CriminalRecord {
         emit RecordUpdated(_recordId, msg.sender, block.timestamp);
     }
     
-    function deactivateRecord(uint256 _recordId) public onlyAuthorized {
+    function deactivateRecord(uint256 _recordId) public ForOfficers {
+        require(users[msg.sender] == Role.Officers, "For Investigating officers");
         require(IDtorecords[_recordId].id != 0, "Record does not exist");
         IDtorecords[_recordId].isActive = false;
+    }
+    function reactivateRecord(uint256 _recordId) public ForOfficers {
+        require(users[msg.sender] == Role.Officers, "For Investigating officers");
+        require(IDtorecords[_recordId].id != 0, "Record does not exist");
+        IDtorecords[_recordId].isActive = true;
     }
     
     function getRecordCount() public view returns (uint256) {
