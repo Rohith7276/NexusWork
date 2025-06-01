@@ -1,10 +1,9 @@
 // src/services/web3Service.js
 import Web3 from 'web3';
 
-// Replace with your deployed contract address
 const CONTRACT_ADDRESS = "0xfE2787a25737aEE7a3ae24305F874119506e5935";
 
-// Contract ABI (you'll get this after compilation)
+
 const CONTRACT_ABI = [
   {
     "inputs": [],
