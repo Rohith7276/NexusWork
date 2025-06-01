@@ -25,10 +25,11 @@ const WalletConnectButton = ({ onConnect }) => {
           Connect Wallet
         </button>
       ) : (
-        <div className="text-green-400">✅ Connected: {account.slice(0, 6)}...{account.slice(-4)}</div>
+        <div className="text-green-400">Connected: {account.slice(0, 6)}...{account.slice(-4)}</div>
       )}
     </div>
   );
 };
 
 export default WalletConnectButton;
+
