@@ -21,7 +21,7 @@ class IPFSService {
       });
       return res.data.IpfsHash;
     } catch (error) {
-      console.error('❌ Error uploading file to Pinata:', error);
+      console.error('Error uploading file to Pinata:', error);
       throw new Error('Failed to upload file to IPFS');
     }
   }
@@ -39,7 +39,7 @@ class IPFSService {
       });
       return res.data.IpfsHash;
     } catch (error) {
-      console.error('❌ Error uploading JSON to Pinata:', error);
+      console.error(' Error uploading JSON to Pinata:', error);
       throw new Error('Failed to upload JSON to IPFS');
     }
   }
